@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Dashboard KPI</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
+    <style>
+        #dashboard, #data-table {
+            display: none;
+        }
+        .alert {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <button onclick="showDashboard()">Show Dashboard</button>
+        <button onclick="showTable()">Show Table</button>
+    </div>
+    <div id="alerts"></div>
+    <div id="dashboard" style="width:1000px; height:800px;"></div>
+    <div id="data-table"></div>
+    <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        socket.on('update_dashboard', function(data) {
+            var dashboard = document.getElementById('dashboard');
+            var table = document.getElementById('data-table');
+            var alertsDiv = document.getElementById('alerts');
+
+            var fig = JSON.parse(data.fig);
+            Plotly.newPlot(dashboard, fig.data, fig.layout);
+            table.innerHTML = data.table;
+
+            // Hiển thị cảnh báo
+            alertsDiv.innerHTML = '';
+            if (data.alerts.length > 0) {
+                data.alerts.forEach(function(alert) {
+                    var alertElement = document.createElement('div');
+                    alertElement.className = 'alert';
+                    alertElement.innerText = alert;
+                    alertsDiv.appendChild(alertElement);
+                });
+            }
+        });
+
+        function showDashboard() {
+            document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('data-table').style.display = 'none';
+        }
+
+        function showTable() {
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('data-table').style.display = 'block';
+        }
+
+        // Request an update every 30 seconds
+        setInterval(function() {
+            socket.emit('request_update');
+        }, 30000);
+
+        // Show dashboard by default
+        showDashboard();
+    </script>
+</body>
+</html>
