@@ -90,7 +90,7 @@ CREATE TABLE KPI (
     SoHopDongMoi INT NOT NULL,
     SoHopDongGiaHan DECIMAL(5,2) NOT NULL,
     SoPhongTrong INT NOT NULL,
-    SoThanhToanCham DECIMAL(10,2) NOT NULL,
+  
     SoYeuCauBaoTri INT NOT NULL DEFAULT 0
 );
 
